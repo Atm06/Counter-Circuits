@@ -1,0 +1,40 @@
+module tb;
+  reg clk,rstn;
+  wire [1:0]y;
+  cntr_up_asynch c1(clk,rstn,y);
+  
+  always #5 clk = ~clk;
+  
+  initial 
+    begin
+      $dumpfile("tb.vcd");
+      $dumpvars(1,tb);
+      {clk,rstn} <= 0;
+      #10 rstn <= 1;
+      #48 rstn =0;
+      #20 rstn =1;
+      #20
+      $finish;
+  end
+endmodule
+
+// Code your design//
+module cntr_up_asynch(input clk,rstn,output [1:0]y);
+  wire [1:0] q,qb;
+  
+  tff t0(1'b1,clk,rstn,q[0],qb[0]);
+  tff t1(1'b1,qb[0],rstn,q[1],qb[1]);
+  assign y=q;
+endmodule
+
+module tff(input t,clk,rstn, output reg q, output qb);
+  assign qb = ~q;
+  always@(negedge clk,negedge rstn)
+    if(!rstn)
+      q<=0;
+  else
+    if(t)
+      q<=~q;
+  else 
+    q<=q;
+endmodule
